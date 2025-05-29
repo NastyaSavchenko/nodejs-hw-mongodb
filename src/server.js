@@ -8,8 +8,8 @@ app.use(cors());
 
 const logger = pino();
 
-app.get('/api/contacts', getContacts);
-app.get('/api/contacts/:id', getOneContactById);
+app.get('/contacts', getContacts);
+app.get('/contacts/:id', getOneContactById);
 
 app.use((req, res) => {
   res.status(404).json({
