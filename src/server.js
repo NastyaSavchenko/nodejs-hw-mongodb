@@ -1,11 +1,15 @@
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino';
+import { getContacts, getOneContactById } from './controllers/contacts.js';
 
 const app = express();
 app.use(cors());
 
 const logger = pino();
+
+app.get('/api/contacts', getContacts);
+app.get('/api/contacts/:id', getOneContactById);
 
 app.use((req, res) => {
   res.status(404).json({
