@@ -24,7 +24,7 @@ export async function getOneContactById(req, res) {
 
     res.status(200).json({
       status: 200,
-      message: 'Successfully found contact!',
+      message: `Successfully found contact with id ${id}!`,
       data: contact,
     });
   } catch (error) {
