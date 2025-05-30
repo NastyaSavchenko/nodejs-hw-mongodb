@@ -24,7 +24,6 @@ export async function getOneContactById(req, res) {
     const contact = await getContactById(id);
 
     if (!contact) {
-      console.log(contact);
       return res.status(404).json({
         status: 404,
         message: 'Contact not found',
