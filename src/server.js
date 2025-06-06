@@ -1,21 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino';
-import { getContacts, getOneContactById } from './controllers/contacts.js';
+import router from './routers/contacts.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
 
 const app = express();
-app.use(cors());
 
 const logger = pino();
+app.use(cors());
 
-app.get('/contacts', getContacts);
-app.get('/contacts/:id', getOneContactById);
-
-app.use((req, res) => {
-  res.status(404).json({
-    message: 'Not found',
-  });
-});
+app.use('/', router);
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
