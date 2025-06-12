@@ -3,7 +3,16 @@ function parseSortBy(value) {
     return '_id';
   }
 
-  const keys = ['_id', 'name', 'year', 'createdAt', 'updatedAt'];
+  const keys = [
+    '_id',
+    'name',
+    'phoneNumber',
+    'email',
+    'contactType',
+    'isFavourite',
+    'createdAt',
+    'updatedAt',
+  ];
 
   if (!keys.includes(value)) {
     return '_id';
