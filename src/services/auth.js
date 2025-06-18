@@ -1,7 +1,8 @@
-import { User } from '../models/user.js';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
+import crypto from 'node:crypto';
 import Session from '../models/session.js';
+import { User } from '../models/user.js';
 
 async function registerUser(newUser) {
   const user = await User.findOne({ email: newUser.email });
@@ -25,14 +26,57 @@ async function loginUser(email, password) {
     throw new createHttpError.Unauthorized('Incorrect email or password');
   }
 
+  await Session.deleteOne({ userId: user._id });
+
+  const accessToken = crypto.randomBytes(30).toString('base64');
+  const refreshToken = crypto.randomBytes(30).toString('base64');
+  const accessTokenValidUntil = new Date(Date.now() + 15 * 60 * 1000);
+  const refreshTokenValidUntil = new Date(
+    Date.now() + 30 * 24 * 60 * 60 * 1000,
+  );
+
   return Session.create({
     userId: user._id,
-    token: 'generateToken()',
-    accessToken: 'accessToken',
-    refreshToken: 'enerateRefreshToken()',
-    accessTokenExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
-    refreshTokenExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil,
+    refreshTokenValidUntil,
   });
 }
 
-export { registerUser, loginUser };
+async function logoutUser(sessionId) {
+  await Session.deleteOne({ _id: sessionId });
+}
+
+async function refreshSession(sessionId, refreshToken) {
+  const session = await Session.findById(sessionId);
+
+  if (!session) {
+    throw new createHttpError.Unauthorized('Session not found');
+  }
+
+  if (session.refreshToken !== refreshToken) {
+    throw new createHttpError.Unauthorized('Invalid refresh token');
+  }
+
+  if (session.refreshTokenValidUntil < new Date()) {
+    throw new createHttpError.Unauthorized('Refresh token expired');
+  }
+
+  await Session.deleteOne({ _id: session._id });
+
+  const accessTokenValidUntil = new Date(Date.now() + 15 * 60 * 1000);
+  const refreshTokenValidUntil = new Date(
+    Date.now() + 30 * 24 * 60 * 60 * 1000,
+  );
+
+  return Session.create({
+    userId: session.userId,
+    accessToken: crypto.randomBytes(30).toString('base64'),
+    refreshToken: crypto.randomBytes(30).toString('base64'),
+    accessTokenValidUntil,
+    refreshTokenValidUntil,
+  });
+}
+
+export { registerUser, loginUser, logoutUser, refreshSession };

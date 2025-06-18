@@ -1,4 +1,9 @@
-import { registerUser, loginUser } from '../services/auth.js';
+import {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshSession,
+} from '../services/auth.js';
 
 async function registerController(req, res) {
   const user = await registerUser(req.body);
@@ -13,13 +18,60 @@ async function registerController(req, res) {
 async function loginController(req, res) {
   const session = await loginUser(req.body.email, req.body.password);
 
-  console.log(session);
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: session.refreshTokenValidUntil,
+  });
+
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: session.refreshTokenValidUntil,
+  });
 
   res.json({
     status: '200',
     message: 'Successfully logged in an user!',
-    accessToken: session.accessToken,
+    data: { accessToken: session.accessToken },
   });
 }
 
-export { registerController, loginController };
+async function refreshController(req, res) {
+  const { sessionId, refreshToken } = req.cookies;
+  const session = await refreshSession(sessionId, refreshToken);
+
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: session.refreshTokenValidUntil,
+  });
+
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: session.refreshTokenValidUntil,
+  });
+
+  res.json({
+    status: '200',
+    message: 'Successfully refreshed a session!',
+    data: { accessToken: session.accessToken },
+  });
+}
+
+async function logoutController(req, res) {
+  const sessionId = req.cookies.sessionId;
+
+  if (typeof sessionId === 'string') {
+    await logoutUser(sessionId);
+  }
+
+  res.clearCookie('sessionId');
+  res.clearCookie('refreshToken');
+
+  res.status(204).end();
+}
+
+export {
+  registerController,
+  loginController,
+  refreshController,
+  logoutController,
+};

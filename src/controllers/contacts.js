@@ -13,8 +13,15 @@ import { parseSortParams } from '../utils/parseSortParams.js';
 export async function getContacts(req, res) {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
+  const userId = req.user.id;
 
-  const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder });
+  const contacts = await getAllContacts({
+    page,
+    perPage,
+    sortBy,
+    sortOrder,
+    userId,
+  });
 
   res.status(200).json({
     status: 200,
@@ -25,8 +32,9 @@ export async function getContacts(req, res) {
 
 export async function getOneContactById(req, res) {
   const { id } = req.params;
+  const userId = req.user.id;
 
-  const contact = await getContactById(id);
+  const contact = await getContactById(id, userId);
 
   if (!contact) {
     throw new createHttpError.NotFound(`Contact not found`);
@@ -42,7 +50,10 @@ export async function getOneContactById(req, res) {
 export async function createContactController(req, res) {
   const contactData = req.body;
 
-  const newContact = await createContact(contactData);
+  const newContact = await createContact({
+    ...contactData,
+    userId: req.user.id,
+  });
 
   res.status(201).json({
     status: 201,
@@ -53,10 +64,10 @@ export async function createContactController(req, res) {
 
 export async function updateContactController(req, res) {
   const id = req.params.id;
-
+  const userId = req.user.id;
   const contactData = req.body;
 
-  const result = await updateContactById(id, contactData);
+  const result = await updateContactById(id, userId, contactData);
 
   if (!result) {
     throw new createHttpError.NotFound('Contact not found');
@@ -71,7 +82,8 @@ export async function updateContactController(req, res) {
 
 export async function deleteContactController(req, res) {
   const id = req.params.id;
-  const result = await deleteContactById(id);
+  const userId = req.user.id;
+  const result = await deleteContactById(id, userId);
 
   if (!result) {
     throw new createHttpError.NotFound('Contact not found');
