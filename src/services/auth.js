@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
 import Session from '../models/session.js';
 import { User } from '../models/user.js';
+import { sendMail } from '../utils/sendMail.js';
 
 async function registerUser(newUser) {
   const user = await User.findOne({ email: newUser.email });
@@ -79,4 +80,24 @@ async function refreshSession(sessionId, refreshToken) {
   });
 }
 
-export { registerUser, loginUser, logoutUser, refreshSession };
+async function requestResetPassword(email) {
+  const user = await User.findOne({ email });
+
+  if (user === null) {
+    throw new createHttpError.NotFound('User not found');
+  }
+
+  await sendMail(
+    user.email,
+    'Reset password',
+    `<p> To reset password, use this <a href="">link</a> </p>`,
+  );
+}
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshSession,
+  requestResetPassword,
+};
