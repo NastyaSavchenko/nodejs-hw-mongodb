@@ -1,0 +1,38 @@
+type: object
+description: Fields to update in the contact
+properties:
+  name:
+    type: string
+    description: Full name of the contact
+    minLength: 2
+    maxLength: 30
+    example: Alice
+
+  email:
+    type: string
+    description: Email address of the contact
+    format: email
+    example: alice@example.com
+
+  phoneNumber:
+    type: string
+    description: Phone number of the contact
+    minLength: 10
+    maxLength: 15
+    example: "+123456789"
+
+  contactType:
+    type: string
+    description: Type of contact (work, home, personal)
+    enum: [work, home, personal]
+    example: home
+
+  isFavourite:
+    type: boolean
+    description: Whether the contact is marked as favourite
+    example: true
+
+  photo:
+    type: string
+    format: binary
+    description: Optional photo to update
