@@ -1,4 +1,7 @@
+import { rename } from 'node:fs/promises';
+import path from 'node:path';
 import createHttpError from 'http-errors';
+
 import {
   getAllContacts,
   getContactById,
@@ -50,9 +53,15 @@ export async function getOneContactById(req, res) {
 export async function createContactController(req, res) {
   const contactData = req.body;
 
+  await rename(
+    req.file.path,
+    path.resolve('src', 'uploads', 'photos', req.file.filename),
+  );
+
   const newContact = await createContact({
     ...contactData,
     userId: req.user.id,
+    photo: req.file.filename,
   });
 
   res.status(201).json({
