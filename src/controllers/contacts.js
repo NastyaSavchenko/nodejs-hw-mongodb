@@ -1,4 +1,4 @@
-import { rename } from 'node:fs/promises';
+import * as fs from 'node:fs/promises';
 import path from 'node:path';
 import createHttpError from 'http-errors';
 
@@ -53,19 +53,25 @@ export async function getOneContactById(req, res) {
 
 export async function createContactController(req, res) {
   const contactData = req.body;
+  let photo = null;
 
-  const result = await uploadToCloudinary(req.file.path);
-  console.log(' result:', result);
+  if (process.env.UPLOAD_TO_CLOUDINARY === 'true') {
+    const result = await uploadToCloudinary(req.file.path);
+    await fs.unlink(req.file.path);
+    photo = result.secure_url;
+  } else {
+    await fs.rename(
+      req.file.path,
+      path.resolve('src', 'uploads', 'photos', req.file.filename),
+    );
 
-  // await rename(
-  //   req.file.path,
-  //   path.resolve('src', 'uploads', 'photos', req.file.filename),
-  // );
+    photo = `${process.env.DOMAIN_FOR_PHOTO}/${req.file.filename}`;
+  }
 
   const newContact = await createContact({
     ...contactData,
     userId: req.user.id,
-    // photo: req.file.filename,
+    photo,
   });
 
   res.status(201).json({
@@ -79,6 +85,24 @@ export async function updateContactController(req, res) {
   const id = req.params.id;
   const userId = req.user.id;
   const contactData = req.body;
+
+  if (req.file) {
+    let photo = null;
+
+    if (process.env.UPLOAD_TO_CLOUDINARY === 'true') {
+      const result = await uploadToCloudinary(req.file.path);
+      await fs.unlink(req.file.path);
+      photo = result.secure_url;
+    } else {
+      await fs.rename(
+        req.file.path,
+        path.resolve('src', 'uploads', 'photos', req.file.filename),
+      );
+      photo = `${process.env.DOMAIN_FOR_PHOTO}/${req.file.filename}`;
+    }
+
+    contactData.photo = photo;
+  }
 
   const result = await updateContactById(id, userId, contactData);
 
