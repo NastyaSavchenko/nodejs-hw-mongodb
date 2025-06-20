@@ -4,6 +4,7 @@ import {
   registerSchema,
   loginSchema,
   requestResetPasswordSchema,
+  resetPasswordSchema,
 } from '../validation/auth.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import {
@@ -12,6 +13,7 @@ import {
   refreshController,
   logoutController,
   requestResetPasswordController,
+  resetPasswordController,
 } from '../controllers/auth.js';
 
 const router = express.Router();
@@ -41,6 +43,11 @@ router.post(
   ctrlWrapper(requestResetPasswordController),
 );
 
-router.post('/reset-pwd', ctrlWrapper());
+router.post(
+  '/reset-pwd',
+  jsonParser,
+  validateBody(resetPasswordSchema),
+  ctrlWrapper(resetPasswordController),
+);
 
 export default router;

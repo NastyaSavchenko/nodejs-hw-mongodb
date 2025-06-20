@@ -127,10 +127,38 @@ async function requestResetPassword(email) {
   }
 }
 
+async function resetPassword(password, token) {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.sub);
+
+    if (user === null) {
+      throw new createHttpError.NotFound('User not found!');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await User.findByIdAndUpdate(user._id, { password: hashedPassword });
+
+    await Session.deleteOne({ userId: user._id });
+  } catch (error) {
+    if (
+      error.name === 'JsonWebTokenError' ||
+      error.name === 'TokenExpiredError'
+    ) {
+      throw new createHttpError.Unauthorized('Token is expired or invalid.');
+    }
+
+    throw error;
+  }
+}
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   refreshSession,
   requestResetPassword,
+  resetPassword,
 };
