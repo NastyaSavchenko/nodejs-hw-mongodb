@@ -13,10 +13,6 @@ const transport = nodemailer.createTransport({
 });
 
 export function sendMail(to, subject, html) {
-  console.log('SMTP_USER:', process.env.SMTP_USER);
-  console.log('SMTP_HOST:', process.env.SMTP_HOST);
-  console.log('SMTP_PASSWORD:', process.env.SMTP_PASSWORD ? 'SET' : 'NOT SET');
-
   return transport.sendMail({
     from: process.env.SMTP_FROM,
     to,

@@ -1,9 +1,20 @@
+import * as fs from 'node:fs';
+import path from 'node:path';
+
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
+import Handlebars from 'handlebars';
+import jwt from 'jsonwebtoken';
+
 import Session from '../models/session.js';
 import { User } from '../models/user.js';
 import { sendMail } from '../utils/sendMail.js';
+
+const RESET_PASSWORD_TEMPLATE = fs.readFileSync(
+  path.resolve('src', 'templates', 'reset-password.hbs'),
+  'UTF-8',
+);
 
 async function registerUser(newUser) {
   const user = await User.findOne({ email: newUser.email });
@@ -87,11 +98,33 @@ async function requestResetPassword(email) {
     throw new createHttpError.NotFound('User not found');
   }
 
-  await sendMail(
-    user.email,
-    'Reset password',
-    `<p> To reset password, use this <a href="">link</a> </p>`,
+  const html = Handlebars.compile(RESET_PASSWORD_TEMPLATE);
+
+  const token = jwt.sign(
+    {
+      sub: user._id,
+      name: user.name,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '15m',
+    },
   );
+
+  try {
+    await sendMail(
+      user.email,
+      'Reset password',
+      html({
+        link: `${process.env.APP_DOMAIN}/reset-password/?token=${token}`,
+      }),
+    );
+  } catch (err) {
+    console.log(err);
+    throw new createHttpError.InternalServerError(
+      'Failed to send the email, please try again later.',
+    );
+  }
 }
 
 export {
