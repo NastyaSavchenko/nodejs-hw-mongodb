@@ -109,6 +109,121 @@
           }
         }
       }
+    },
+    "/contacts": {
+      "post": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Create a contact",
+        "operationId": "createContact",
+        "description": "Create a new contact and save it to the user's contact list.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "phoneNumber",
+                  "contactType",
+                  "userId"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Full name of the contact",
+                    "example": "Alice"
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "description": "Phone number of the contact",
+                    "example": "+123456789"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the contact",
+                    "example": "alice@example.com"
+                  },
+                  "contactType": {
+                    "type": "string",
+                    "description": "Type of contact (work, home, personal)",
+                    "enum": [
+                      "work",
+                      "home",
+                      "personal"
+                    ],
+                    "example": "personal",
+                    "default": "personal"
+                  },
+                  "isFavourite": {
+                    "type": "boolean",
+                    "description": "Whether the contact is marked as favourite",
+                    "example": false,
+                    "default": false
+                  },
+                  "userId": {
+                    "type": "string",
+                    "description": "ID of the user who owns the contact",
+                    "example": "60b8d295f1a4c22f1436ebf8"
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Optional photo file",
+                    "default": null
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Contact created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 201
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successfully created a contact!"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/contact"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -199,37 +314,72 @@
       }
     },
     "responses": {
+      "400": {
+        "description": "Bad request – invalid input data",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "status",
+                "message",
+                "data"
+              ],
+              "properties": {
+                "status": {
+                  "type": "integer",
+                  "example": 400
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Bad request error"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Missing required fields or invalid input format"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "401": {
-        "401": {
-          "description": "Unauthorized – access token is missing or invalid",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "status",
-                  "message",
-                  "data"
-                ],
-                "properties": {
-                  "status": {
-                    "type": "integer",
-                    "example": 401
-                  },
-                  "message": {
-                    "type": "string",
-                    "example": "Unauthorized error"
-                  },
-                  "data": {
-                    "type": "object",
-                    "required": [
-                      "message"
-                    ],
-                    "properties": {
-                      "message": {
-                        "type": "string",
-                        "example": "Please provide access token"
-                      }
+        "description": "Unauthorized – access token is missing or invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "status",
+                "message",
+                "data"
+              ],
+              "properties": {
+                "status": {
+                  "type": "integer",
+                  "example": 401
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Unauthorized error"
+                },
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Please provide access token"
                     }
                   }
                 }
@@ -239,25 +389,23 @@
         }
       },
       "500": {
-        "500": {
-          "description": "Internal Server Error – something went wrong on the server",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "status",
-                  "message"
-                ],
-                "properties": {
-                  "status": {
-                    "type": "integer",
-                    "example": 500
-                  },
-                  "message": {
-                    "type": "string",
-                    "example": "Internal Server Error"
-                  }
+        "description": "Internal Server Error – something went wrong on the server",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "status",
+                "message"
+              ],
+              "properties": {
+                "status": {
+                  "type": "integer",
+                  "example": 500
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Internal Server Error"
                 }
               }
             }
