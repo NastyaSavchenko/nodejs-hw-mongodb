@@ -47,11 +47,6 @@ requestBody:
             description: Whether the contact is marked as favourite
             example: true
 
-          userId:
-            type: string
-            description: ID of the user who owns the contact
-            example: 60b8d295f1a4c22f1436ebf8
-
           photo:
             type: string
             format: binary

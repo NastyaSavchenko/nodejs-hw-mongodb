@@ -14,7 +14,7 @@ tags:
 
 servers:
   - url: http://127.0.0.1:3000
-  - url: ""
+  - url: https://contacts-app-m5io.onrender.com
 
 paths:
   /contacts:

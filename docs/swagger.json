@@ -14,7 +14,7 @@
       "url": "http://127.0.0.1:3000"
     },
     {
-      "url": ""
+      "url": "https://contacts-app-m5io.onrender.com"
     }
   ],
   "tags": [
@@ -187,8 +187,7 @@
                 "required": [
                   "name",
                   "phoneNumber",
-                  "contactType",
-                  "userId"
+                  "contactType"
                 ],
                 "properties": {
                   "name": {
@@ -222,11 +221,6 @@
                     "description": "Whether the contact is marked as favourite",
                     "example": false,
                     "default": false
-                  },
-                  "userId": {
-                    "type": "string",
-                    "description": "ID of the user who owns the contact",
-                    "example": "60b8d295f1a4c22f1436ebf8"
                   },
                   "photo": {
                     "type": "string",
@@ -403,11 +397,6 @@
                     "type": "boolean",
                     "description": "Whether the contact is marked as favourite",
                     "example": true
-                  },
-                  "userId": {
-                    "type": "string",
-                    "description": "ID of the user who owns the contact",
-                    "example": "60b8d295f1a4c22f1436ebf8"
                   },
                   "photo": {
                     "type": "string",
